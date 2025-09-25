@@ -6,7 +6,11 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'amr_project.settings')
+    
+    # Use production settings by default for deployment
+    settings_module = 'zimamr.settings_deploy' if 'RENDER' in os.environ else 'zimamr.settings'
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
