@@ -11,15 +11,15 @@ export const fetchTimeTrend = async (period = 'month') => {
   return response.json();
 };
 
-// Export as both 'fetchOptions' and 'options' for compatibility
 export const fetchOptions = async () => {
   const response = await fetch(`${API_BASE}/options/`);
   return response.json();
 };
 
-// Keep the old export name for compatibility
+// Keep backward compatibility
 export const options = fetchOptions;
 
+// ... rest of your functions
 export const fetchFacilities = async () => {
   const response = await fetch(`${API_BASE}/facilities/`);
   return response.json();
