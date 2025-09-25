@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { options } from "./api";
+import { fetchOptions } from "./api";
 
 // Export this so other files can import it
 export const ALL = "All";
