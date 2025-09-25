@@ -1,14 +1,14 @@
-"""zimamr URL Configuration"""
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
-from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
+@api_view(['GET'])
 def api_root(request):
-    return JsonResponse({"message": "ZimAMR API is running!"})
+    return Response({"message": "ZimAMR API is running!", "status": "success"})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', api_root, name='api-root'),
-    path('api/auth/', include('rest_framework.urls')),
+    path('api/', include('amr_reports.urls')),
 ]

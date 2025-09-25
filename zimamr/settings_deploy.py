@@ -4,13 +4,12 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-production')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this')
 
 DEBUG = False
 
 ALLOWED_HOSTS = ['zimamr-backend.onrender.com', 'localhost', '127.0.0.1']
 
-# Basic Django apps (no custom apps)
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -20,6 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'amr_reports',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +54,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'zimamr.wsgi.application'
 
-# Database
 DATABASES = {
     'default': dj_database_url.config(
         default='postgresql://neondb_owner:npg_xTwiJPLby6h5@ep-icy-cake-adx7ln80-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
@@ -62,17 +61,12 @@ DATABASES = {
     )
 }
 
-# Static files
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# CORS
-CORS_ALLOWED_ORIGINS = [
-    "https://zimamr.vercel.app",
-    "http://localhost:3000",
-]
-
-# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
