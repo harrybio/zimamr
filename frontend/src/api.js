@@ -1,113 +1,70 @@
-// src/api.js — named exports + default api object
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-const BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "")) || "/api";
+// API endpoints
+export const API = API_BASE;
 
-async function req(path, { method = "GET", json, formData, params } = {}) {
-  const url = new URL(`${BASE_URL}${path}`, window.location.origin);
-
-  // attach query params (skip blanks/All)
-  if (params && typeof params === "object") {
-    Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== "" && v !== "All") {
-        url.searchParams.set(k, v);
-      }
-    });
-  }
-
-  const headers = {};
-  let body;
-  if (json) {
-    headers["Content-Type"] = "application/json";
-    body = JSON.stringify(json);
-  } else if (formData) {
-    body = formData; // browser sets boundary
-  }
-
-  const res = await fetch(url.toString(), { method, headers, body });
-  const text = await res.text().catch(() => "");
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-
-  if (!res.ok) {
-    const msg =
-      (data && (data.detail || data.error || data.message)) ||
-      text ||
-      `HTTP ${res.status}`;
-    throw new Error(msg);
-  }
-  return data;
-}
-
-// ---- OPTIONS ----
-export const options = async (params) => {
-  const data = await req("/options", { params });
-  return {
-    hosts: (data && data.hosts) || ["HUMAN","ANIMAL","ENVIRONMENT"],
-    environment_types: (data && data.environment_types) || [],
-    animal_species: (data && data.animal_species) || [],
-    ...data,
-  };
-};
-// ---- SUMMARY ----
-export const countsSummary = (params = {}) => req("/summary/counts-summary", { params: buildSummaryParams(params) });
-export const timeTrends     = (params = {}) => req("/summary/time-trends",     { params: buildSummaryParams(params) });
-export const antibiogram    = (params = {}) => req("/summary/antibiogram",     { params: buildSummaryParams(params) });
-export const sexAge         = (params) => req("/summary/sex-age",         { params });
-
-// ---- GEO ----
-export const geoFacilities  = (params) => req("/geo/facilities",          { params });
-
-// ---- ALERTS ----
-export const alertsFeed     = (params) => req("/alerts",                  { params });
-
-// ---- REPORTS ----
-export const reportSummary        = (params) => req("/reports/summary",         { params });
-export const reportFacilityLeague = (params) => req("/reports/facility-league", { params });
-export const reportAntibiogram    = (params) => req("/reports/antibiogram",    { params });
-
-// ---- DATA ENTRY ----
-export const createEntry = (json) => req("/entry", { method: "POST", json });
-
-export const uploadCSV = (file) => {
-  const fd = new FormData();
-  fd.append("file", file);
-  return req("/upload/csv", { method: "POST", formData: fd });
+// Summary endpoints
+export const fetchCountsSummary = async () => {
+  const response = await fetch(`${API_BASE}/summary/counts-summary/`);
+  if (!response.ok) throw new Error('Failed to fetch counts summary');
+  return response.json();
 };
 
-// Default export so older imports still work
-const api = {
-  options,
-  countsSummary,
-  timeTrends,
-  antibiogram,
-  sexAge,
-  geoFacilities,
-  alertsFeed,
-  reportSummary,
-  reportFacilityLeague,
-  reportAntibiogram,
-  createEntry,
-  uploadCSV,
+export const fetchTimeTrend = async (period = 'month') => {
+  const response = await fetch(`${API_BASE}/summary/time-trends/?period=${period}`);
+  if (!response.ok) throw new Error('Failed to fetch time trends');
+  return response.json();
 };
-export default api;
 
+export const fetchOptions = async () => {
+  const response = await fetch(`${API_BASE}/options/`);
+  if (!response.ok) throw new Error('Failed to fetch options');
+  return response.json();
+};
 
-// === AMR helper: build params for summary endpoints ===
-function buildSummaryParams(input = {}) {
-  const out = {};
-  const set = (k, v) => { if (v != null && v !== "") out[k] = v; };
+// Other API functions
+export const fetchFacilities = async () => {
+  const response = await fetch(`${API_BASE}/facilities/`);
+  if (!response.ok) throw new Error('Failed to fetch facilities');
+  return response.json();
+};
 
-  // Host + dependent filters
-  set("host_type", input.host_type);
-  if (input.host_type === "ENVIRONMENT") set("environment_type", input.environment_type);
-  if (input.host_type === "ANIMAL")      set("animal_species",   input.animal_species);
+export const fetchSexAge = async () => {
+  const response = await fetch(`${API_BASE}/sex-age/`);
+  if (!response.ok) throw new Error('Failed to fetch sex/age data');
+  return response.json();
+};
 
-  // Pass-through others without overwriting above keys
-  Object.entries(input).forEach(([k, v]) => {
-    if (["host_type","environment_type","animal_species"].includes(k)) return;
-    if (v != null && v !== "" && out[k] == null) out[k] = v;
+export const fetchGeo = async () => {
+  const response = await fetch(`${API_BASE}/geo/`);
+  if (!response.ok) throw new Error('Failed to fetch geo data');
+  return response.json();
+};
+
+export const fetchAntibiogram = async () => {
+  const response = await fetch(`${API_BASE}/antibiogram/`);
+  if (!response.ok) throw new Error('Failed to fetch antibiogram');
+  return response.json();
+};
+
+export const fetchDataQuality = async () => {
+  const response = await fetch(`${API_BASE}/data-quality/`);
+  if (!response.ok) throw new Error('Failed to fetch data quality');
+  return response.json();
+};
+
+export const fetchAlerts = async () => {
+  const response = await fetch(`${API_BASE}/alerts/`);
+  if (!response.ok) throw new Error('Failed to fetch alerts');
+  return response.json();
+};
+
+// Upload functions
+export const uploadFile = async (formData) => {
+  const response = await fetch(`${API_BASE}/upload/`, {
+    method: 'POST',
+    body: formData,
   });
-  return out;
-}
-// END_AMR_HELPER
+  if (!response.ok) throw new Error('Upload failed');
+  return response.json();
+};
